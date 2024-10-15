@@ -40,7 +40,7 @@ pipeline {
         always {
             script {
                 bat '''
-                    echo Virtual environment does not need explicit deactivation in Windows.
+
                     echo The session will end when the job finishes.
                 '''
             }
