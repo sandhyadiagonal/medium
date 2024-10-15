@@ -1,14 +1,9 @@
 # Use an official Python runtime as a parent image
-FROM python:latest
+#FROM python:latest
+FROM apache/arrow-python:latest
 
 # Set the working directory in the container
 WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y cmake build-essential libarrow-dev libparquet-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements.txt file into the container at /app
 COPY requirements.txt ./
