@@ -26,10 +26,11 @@ pipeline {
         stage('Run Streamlit App') {
             steps {
                 script {
+                    // Combine the activation and running command in one bat step
                     bat '''
                         call .\\env\\Scripts\\activate
                         start /B cmd /C "streamlit run app.py --server.port=8501 > streamlit.log 2>&1"
-                        timeout /t 5
+                        timeout /t 180
                     '''
                 }
             }
