@@ -6,8 +6,8 @@ pipeline {
             steps {
                 script {
                     git branch: 'main', url: 'https://github.com/sandhyadiagonal/medium.git'
-                }        
-            }        
+                }
+            }
         }
 
         stage('Create Virtual Environment') {
@@ -20,7 +20,7 @@ pipeline {
                         pip install -r requirements.txt
                     '''
                 }
-            }        
+            }
         }
 
         stage('Run Streamlit App') {
@@ -31,15 +31,18 @@ pipeline {
                         streamlit run app.py
                     '''
                 }
-            }        
+            }
         }
     }
 
     post {
         always {
             script {
-                bat 'deactivate'
-            }        
-        }    
+                bat '''
+                    echo Virtual environment does not need explicit deactivation in Windows.
+                    echo The session will end when the job finishes.
+                '''
+            }
+        }
     }
 }
