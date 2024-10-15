@@ -27,9 +27,7 @@ pipeline {
             steps {
                 script {
                     bat '''
-                        .\\env\\Scripts\\activate
-                        streamlit run app.py
-                        timeout /t 300
+                        start cmd /k ".\\env\\Scripts\\activate && streamlit run app.py"
                     '''
                 }
             }
@@ -40,7 +38,6 @@ pipeline {
         always {
             script {
                 bat '''
-                    echo Virtual environment does not need explicit deactivation in Windows.
                     echo The session will end when the job finishes.
                 '''
             }
