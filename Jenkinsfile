@@ -27,7 +27,7 @@ pipeline {
             steps {
                 script {
                     bat '''
-                        start cmd /k ".\\env\\Scripts\\activate && streamlit run app.py"
+                        start cmd /c ".\\env\\Scripts\\activate && streamlit run app.py --server.port 8501 --server.address 0.0.0.0"
                     '''
                 }
             }
