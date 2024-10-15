@@ -28,7 +28,7 @@ pipeline {
                 script {
                     bat '''
                         .\\env\\Scripts\\activate
-                        streamlit run app.py
+                        start /B streamlit run app.py --server.port=8501 > streamlit.log 2>&1
                         timeout /t 300
                     '''
                 }
@@ -40,7 +40,6 @@ pipeline {
         always {
             script {
                 bat '''
-                    echo Virtual environment does not need explicit deactivation in Windows.
                     echo The session will end when the job finishes.
                 '''
             }
