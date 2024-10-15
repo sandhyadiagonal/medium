@@ -17,6 +17,8 @@ pipeline {
                         python -m venv env
                         .\\env\\Scripts\\activate
                         pip install --upgrade pip
+                        python --version
+                        pip --version
                         pip install streamlit
                         pip install -r requirements.txt
                     '''
