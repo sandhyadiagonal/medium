@@ -29,6 +29,7 @@ pipeline {
                     bat '''
                         .\\env\\Scripts\\activate
                         streamlit run app.py
+                        timeout /t 300
                     '''
                 }
             }
