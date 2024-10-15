@@ -27,9 +27,9 @@ pipeline {
             steps {
                 script {
                     bat '''
-                        .\\env\\Scripts\\activate
-                        start /B streamlit run app.py --server.port=8501 > streamlit.log 2>&1
-                        timeout /t 300
+                        call .\\env\\Scripts\\activate
+                        start /B cmd /C "streamlit run app.py --server.port=8501 > streamlit.log 2>&1"
+                        timeout /t 5
                     '''
                 }
             }
