@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y cmake build-essential && \
+    apt-get install -y cmake build-essential libarrow-dev libparquet-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
