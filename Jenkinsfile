@@ -29,7 +29,7 @@ pipeline {
                 script {
 
                     bat '''
-                        start cmd /c ".\\env\\Scripts\\activate && streamlit run app.py --server.port 8501 --server.address 0.0.0.0"
+                        start cmd /c ".\\env\\Scripts\\activate && streamlit run app.py"
                     '''
                     sleep 180
                     bat 'start http://localhost:8501'
