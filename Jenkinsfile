@@ -30,7 +30,6 @@ pipeline {
 
                     bat '''
                         start cmd /c ".\\env\\Scripts\\activate && streamlit run app.py"
-                        sleep 120
                         start http://localhost:8501
                     '''
                     // sleep 180
