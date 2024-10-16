@@ -2,7 +2,7 @@ pipeline {
     agent { label 'windows' }
 
     triggers {
-        cron('2 23 * * *') // This sets the build to run every day at 22:25.
+        cron('33 2 * * *') // This sets the build to run every day at 22:25.
     }
 
     stages {
