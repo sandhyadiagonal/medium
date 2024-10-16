@@ -27,12 +27,13 @@ pipeline {
         stage('Run Streamlit App') {
             steps {
                 script {
-
                     bat '''
                         start cmd /c "call .\\env\\Scripts\\activate && streamlit run app.py --server.headless true > streamlit.log 2>&1"
                     '''
-                    sleep 180
-                    // bat 'start http://localhost:8501'
+                    while (true) {
+                        echo "Streamlit app is running..."
+                        sleep 60
+                    }
                 }
             }
         }
