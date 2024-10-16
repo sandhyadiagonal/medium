@@ -27,11 +27,10 @@ pipeline {
         stage('Run Streamlit App') {
             steps {
                 script {
-                    def output = bat(returnStdout: true, script: '.\\env\\Scripts\\activate && streamlit run app.py')
+                    def output = bat(returnStdout: true, script: '''
+                    .\\env\\Scripts\\activate && streamlit run app.py --server.port 8501 --server.address 0.0.0.0 > streamlit.log 2>&1
+                    ''')
                     echo "Output:\n${output}"
-                    // bat '''
-                    //     start cmd /c ".\\env\\Scripts\\activate && streamlit run app.py --server.port 8501 --server.address 0.0.0.0 > streamlit.log 2>&1"
-                    // '''
                 }
             }
         }
