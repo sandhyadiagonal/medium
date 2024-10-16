@@ -15,10 +15,8 @@ pipeline {
                 script {
                     bat '''
                         python -m venv env
-                        .\\env\\Scripts\\activate
+                        call .\\env\\Scripts\\activate
                         pip install --upgrade pip
-                        python --version
-                        pip --version
                         pip install streamlit
                         pip install -r requirements.txt
                     '''
@@ -29,9 +27,11 @@ pipeline {
         stage('Run Streamlit App') {
             steps {
                 script {
-                    bat '''
-                        start cmd /c ".\\env\\Scripts\\activate && streamlit run app.py --server.port 8501 --server.address 0.0.0.0 > streamlit.log 2>&1"
-                    '''
+                    def output = bat(returnStdout: true, script: '.\\env\\Scripts\\activate && streamlit run app.py')
+                    echo "Output:\n${output}"
+                    // bat '''
+                    //     start cmd /c ".\\env\\Scripts\\activate && streamlit run app.py --server.port 8501 --server.address 0.0.0.0 > streamlit.log 2>&1"
+                    // '''
                 }
             }
         }
