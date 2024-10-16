@@ -8,7 +8,7 @@ pipeline {
         //             git branch: 'main', url: 'https://github.com/sandhyadiagonal/medium.git'
         //         }
         //     }
-        // }
+        //}
 
         stage('Create Virtual Environment') {
             steps {
