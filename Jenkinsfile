@@ -2,7 +2,7 @@ pipeline {
     agent { label 'windows' }
 
     stages {
-        // this is test of repo
+        // this is test of repo for changes in git then build auto
         // stage('Clone Repository') {
         //     steps {
         //         script {
