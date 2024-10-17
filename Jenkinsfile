@@ -2,15 +2,6 @@ pipeline {
     agent { label 'windows' }
 
     stages {
-        // this is test of repo for changes in git then build auto
-        // stage('Clone Repository') {
-        //     steps {
-        //         script {
-        //             git branch: 'main', url: 'https://github.com/sandhyadiagonal/medium.git'
-        //         }
-        //     }
-        //}
-
         stage('Create Virtual Environment') {
             steps {
                 script {
@@ -21,6 +12,20 @@ pipeline {
                         pip install streamlit
                         pip install -r requirements.txt
                     '''
+                }
+            }
+        }
+
+        stage('Approval Request') {
+            steps {
+                script {
+                    mail(
+                        to: 'sandhyanotes23@gmail.com',
+                        subject: "Job '${env.JOB_BASE_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
+                        body: "Please go to console output of ${env.BUILD_URL} to approve or Reject."
+                    )
+                    
+                    def userInput = input(id: 'userInput', message: 'Job A Failed do you want to build Job B?', ok: 'Yes')
                 }
             }
         }
