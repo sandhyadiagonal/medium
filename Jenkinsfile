@@ -1,6 +1,15 @@
 pipeline {
     agent { label 'windows' }
 
+    stages {
+        stage('Clone Repository') {
+            steps {
+                script {
+                    git branch: 'main', url: 'https://github.com/sandhyadiagonal/medium.git'
+                }
+            }
+        }
+
         stage('Create Virtual Environment') {
             steps {
                 script {
@@ -23,9 +32,11 @@ pipeline {
                         start cmd /c "call .\\env\\Scripts\\activate && streamlit run app.py --server.headless true > streamlit.log 2>&1"
                     '''
                     sleep 180
+                    // bat 'start http://localhost:8501'
                 }
             }
         }
+    }
 
     post {
         always {
