@@ -16,28 +16,35 @@ pipeline {
             }
         }
 
-        // stage('Approval Request') {
-        //     steps {
-        //         script {
-        //             mail(
-        //                 to: 'sandhyayadav0911@gmail.com',
-        //                 subject: "Job '${env.JOB_BASE_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
-        //                 body: "Please go to console output of ${env.BUILD_URL} to approve or Reject."
-        //             )
-                    
-        //             def userInput = input(id: 'userInput', message: 'Job A Failed do you want to build Job B?', ok: 'Yes')
-        //         }
-        //     }
-        // }
-
-        stage('Run Streamlit App') {
+        stage('Pull Docker Images from Docker Hub') {
             steps {
                 script {
                     bat '''
-                        start cmd /c "call .\\env\\Scripts\\activate && streamlit run app.py --server.headless true > streamlit.log 2>&1"
+                        docker pull sandhyadiagonal/medium:ollama
+                        docker pull sandhyadiagonal/medium:streamlitimage
+                    '''
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    bat '''
+                        docker run -d --name streamlit_container -p 8501:8501 -v %CD%:/app -w /app sandhyadiagonal/medium:streamlitimage
+                    '''
+                }
+            }
+        }
+
+        stage('Run Streamlit App in Docker Container') {
+            steps {
+                script {
+                    bat '''
+                        docker exec streamlit_container bash -c "pip install --upgrade pip && pip install -r requirements.txt && streamlit run app.py --server.headless true > streamlit.log 2>&1"
                     '''
                     while (true) {
-                        echo "Streamlit app is running..."
+                        echo "Streamlit app is running in Docker container..."
                         sleep 60
                     }
                 }
