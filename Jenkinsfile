@@ -52,25 +52,14 @@ pipeline {
                     }
                 }
 
-        stage('Deploy') {
-            steps {
-                echo 'Deploying...'
-                bat 'echo Deploy step running on Windows'
-            }
-        }
-    }
-
-
         stage('Run Streamlit App') {
             steps {
                 script {
                     bat '''
                         start cmd /c "call .\\env\\Scripts\\activate && streamlit run app.py --server.headless true > streamlit.log 2>&1"
                     '''
-                    while (true) {
-                        echo "Streamlit app is running on port 8501..."
-                        sleep 60
-                    }
+                    echo "Streamlit app is running on port 8501..."
+                    sleep 60 
                 }
             }
         }
@@ -91,4 +80,4 @@ pipeline {
                  body: "Build Successful ${env.JOB_NAME} and Build number: ${env.BUILD_NUMBER}.\n\n View the logs at: \n ${env.BUILD_URL}"
         }
     }
-
+}
