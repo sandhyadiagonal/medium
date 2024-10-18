@@ -20,33 +20,32 @@ pipeline {
         stage('Approval') {
             steps {
                 script {
-                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
-                    def commitAuthor = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
-                    def commitHash = sh(script: 'git log -1 --pretty=%h', returnStdout: true).trim()
-                    
+                    def commitMessage = bat(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    def commitAuthor = bat(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
+                    def commitHash = bat(script: 'git log -1 --pretty=%h', returnStdout: true).trim()
+
                     mail to: 'sandhyayadav0911@gmail.com',
-                        cc: 'sandhya.yadav@diagonal.ai',            
-                        subject: "Approval Needed for Job ${env.JOB_NAME}",
-                        body: """\
-        Hi,
+                         cc: 'sandhya.yadav@diagonal.ai',            
+                         subject: "Approval Needed for Job ${env.JOB_NAME}",
+                         body: """\
+Hi,
 
-        Please approve the build by reviewing the following details:
+Please approve the build by reviewing the following details:
 
-        - Job Name: ${env.JOB_NAME}
-        - Build URL: ${env.BUILD_URL}
-        - Branch: ${env.GIT_BRANCH}
-        - Commit Hash: ${commitHash}
-        - Author: ${commitAuthor}
-        - Commit Message: ${commitMessage}
+- Job Name: ${env.JOB_NAME}
+- Build URL: ${env.BUILD_URL}
+- Branch: ${env.GIT_BRANCH}
+- Commit Hash: ${commitHash}
+- Author: ${commitAuthor}
+- Commit Message: ${commitMessage}
 
-        Click the following link to approve the build: ${env.BUILD_URL}input/
+Click the following link to approve the build: ${env.BUILD_URL}input/
 
-        Regards,
-        Jenkins
-        """
+Regards,
+Jenkins
+"""
                     
                     echo 'Waiting for approval...'
-
                     input message: 'Do you approve this build?', ok: 'Approve'
                 }
             }
