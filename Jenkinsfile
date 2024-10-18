@@ -20,8 +20,8 @@ pipeline {
             steps {
                 script {
                     bat '''
-                        docker pull sandhyadiagonal/medium:ollama
-                        docker pull sandhyadiagonal/medium:streamlitimage
+                        docker pull sandhyadiagonal/medium:ollama-container
+                        docker pull sandhyadiagonal/medium:python-app
                     '''
                 }
             }
@@ -31,7 +31,7 @@ pipeline {
             steps {
                 script {
                     bat '''
-                        docker run -d --name streamlit_container -p 8501:8501 -v %CD%:/app -w /app sandhyadiagonal/medium:streamlitimage
+                        docker run -d --name python-app -p 8501:8501 -v %CD%:/app -w /app sandhyadiagonal/medium:python-app
                     '''
                 }
             }
@@ -41,10 +41,11 @@ pipeline {
             steps {
                 script {
                     bat '''
-                        docker exec streamlit_container bash -c "pip install --upgrade pip && pip install -r requirements.txt && streamlit run app.py --server.headless true > streamlit.log 2>&1"
+                        docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
+                        docker exec python-app bash -c "touch streamlit.log && chmod 666 streamlit.log && streamlit run app.py --server.headless true > streamlit.log 2>&1"
                     '''
                     while (true) {
-                        echo "Streamlit app is running in Docker container..."
+                        echo "Streamlit app is running in Docker container on port 8501..."
                         sleep 60
                     }
                 }
