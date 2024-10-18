@@ -31,7 +31,10 @@ pipeline {
                     bat '''
                         start cmd /c "call .\\env\\Scripts\\activate && streamlit run app.py --server.headless true > streamlit.log 2>&1"
                     '''
-                    sleep 180
+                    while (true) {
+                        echo "Streamlit app is running in Docker container on port 8501..."
+                        sleep 60
+                    }
                 }
             }
         }
