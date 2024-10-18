@@ -27,11 +27,12 @@ pipeline {
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Run Docker Containers') {
             steps {
                 script {
                     bat '''
                         docker run -d --name python-app -p 8501:8501 -v %CD%:/app -w /app sandhyadiagonal/medium:python-app
+                        docker run -d --name ollama-container -p 11434:11434 sandhyadiagonal/medium:ollama-container
                     '''
                 }
             }
