@@ -16,23 +16,12 @@ pipeline {
             }
         }
 
-        stage('Pull Docker Images from Docker Hub') {
+        stage('Run Containers with Docker Compose') {
             steps {
                 script {
                     bat '''
-                        docker pull sandhyadiagonal/medium:ollama-container
-                        docker pull sandhyadiagonal/medium:python-app
-                    '''
-                }
-            }
-        }
-
-        stage('Run Docker Containers') {
-            steps {
-                script {
-                    bat '''
-                        docker run -d --name python-app -p 8501:8501 -v %CD%:/app -w /app sandhyadiagonal/medium:python-app
-                        docker run -d --name ollama-container -p 11434:11434 sandhyadiagonal/medium:ollama-container
+                        docker-compose down
+                        docker-compose up -d --build
                     '''
                 }
             }
