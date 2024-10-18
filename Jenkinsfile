@@ -16,19 +16,19 @@ pipeline {
             }
         }
 
-        stage('Approval Request') {
-            steps {
-                script {
-                    mail(
-                        to: 'sandhyanotes23@gmail.com',
-                        subject: "Job '${env.JOB_BASE_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
-                        body: "Please go to console output of ${env.BUILD_URL} to approve or Reject."
-                    )
+        // stage('Approval Request') {
+        //     steps {
+        //         script {
+        //             mail(
+        //                 to: 'sandhyayadav0911@gmail.com',
+        //                 subject: "Job '${env.JOB_BASE_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
+        //                 body: "Please go to console output of ${env.BUILD_URL} to approve or Reject."
+        //             )
                     
-                    def userInput = input(id: 'userInput', message: 'Job A Failed do you want to build Job B?', ok: 'Yes')
-                }
-            }
-        }
+        //             def userInput = input(id: 'userInput', message: 'Job A Failed do you want to build Job B?', ok: 'Yes')
+        //         }
+        //     }
+        // }
 
         stage('Run Streamlit App') {
             steps {
