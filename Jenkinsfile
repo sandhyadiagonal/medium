@@ -1,6 +1,8 @@
 pipeline {
     agent { label 'windows' }
 
+    // working script for running container from github dockerfile
+
     stages {
         stage('Create Virtual Environment') {
             steps {
