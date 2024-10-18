@@ -3,13 +3,14 @@ version: '3'
 services:
 
   ollama-container:
-    image: ollama/ollama
+    image: sandhyadiagonal/medium:ollama-container
     volumes:
       - ./:/data
     ports:
       - 11434:11434
 
   python-app:
-    image: langchain
+    image: sandhyadiagonal/medium:python-app
+    # image: langchain
     ports:
       - 8501:8501    
