@@ -2,14 +2,6 @@ pipeline {
     agent { label 'windows' }
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                script {
-                    git branch: 'main', url: 'https://github.com/sandhyadiagonal/medium.git'
-                }
-            }
-        }
-
         stage('Create Virtual Environment') {
             steps {
                 script {
@@ -24,15 +16,38 @@ pipeline {
             }
         }
 
-        stage('Run Streamlit App') {
+        stage('Run Containers with Docker Compose') {
             steps {
                 script {
-
                     bat '''
-                        start cmd /c "call .\\env\\Scripts\\activate && streamlit run app.py --server.headless true > streamlit.log 2>&1"
+                        docker-compose down
+                        docker-compose up -d --build
                     '''
-                    sleep 180
-                    // bat 'start http://localhost:8501'
+                }
+            }
+        }
+
+        stage('Pull Ollama Model in Ollama Container') {
+            steps {
+                script {
+                    bat '''
+                        docker exec ollama-container bash -c "ollama pull phi:latest"
+                    '''
+                }
+            }
+        }
+
+        stage('Run Streamlit App in Docker Container') {
+            steps {
+                script {
+                    bat '''
+                        docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1"
+                    '''
+                    while (true) {
+                        echo "Streamlit app is running in Docker container on port 8501..."
+                        sleep 60
+                    }
                 }
             }
         }
