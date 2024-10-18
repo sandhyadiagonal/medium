@@ -27,6 +27,16 @@ pipeline {
             }
         }
 
+        stage('Pull Ollama Model in Ollama Container') {
+            steps {
+                script {
+                    bat '''
+                        docker exec ollama-container bash -c "ollama pull phi:latest"
+                    '''
+                }
+            }
+        }
+
         stage('Run Streamlit App in Docker Container') {
             steps {
                 script {
