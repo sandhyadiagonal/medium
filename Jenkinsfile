@@ -2,13 +2,6 @@ pipeline {
     agent { label 'windows' }
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                script {
-                    git branch: 'main', url: 'https://github.com/sandhyadiagonal/medium.git'
-                }
-            }
-        }
 
         stage('Create Virtual Environment') {
             steps {
