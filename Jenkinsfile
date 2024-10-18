@@ -30,27 +30,27 @@ pipeline {
                          cc: 'sandhya.yadav@diagonal.ai',            
                          subject: "Approval Needed for Job ${env.JOB_NAME}",
                          body: """\
-Hi,
+        Hi,
 
-Please approve the build by reviewing the following details:
+        Please approve the build by reviewing the following details:
 
-- Job Name: ${env.JOB_NAME}
-- Build URL: ${env.BUILD_URL}
-- Branch: ${env.GIT_BRANCH}
-- Commit Hash: ${commitHash}
-- Author: ${commitAuthor}
-- Commit Message: ${commitMessage}
+        - Job Name: ${env.JOB_NAME}
+        - Build URL: ${env.BUILD_URL}
+        - Branch: ${env.GIT_BRANCH}
+        - Commit Hash: ${commitHash}
+        - Author: ${commitAuthor}
+        - Commit Message: ${commitMessage}
 
-Click the following link to approve the build: ${env.BUILD_URL}input/
+        Click the following link to approve the build: ${env.BUILD_URL}input/
 
-Regards,
-Jenkins
-"""
-                    echo 'Waiting for approval...'
-                    input message: 'Do you approve this build?', ok: 'Approve'
+        Regards,
+        Jenkins
+        """
+                            echo 'Waiting for approval...'
+                            input message: 'Do you approve this build?', ok: 'Approve'
+                        }
+                    }
                 }
-            }
-        }
 
         stage('Deploy') {
             steps {
@@ -91,4 +91,4 @@ Jenkins
                  body: "Build Successful ${env.JOB_NAME} and Build number: ${env.BUILD_NUMBER}.\n\n View the logs at: \n ${env.BUILD_URL}"
         }
     }
-}
+
