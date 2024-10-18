@@ -24,10 +24,23 @@ pipeline {
             }
         }
 
+        stage('Approval') {
+            steps {
+                script {
+                    mail to: 'sandhyayadav0911@gmail.com',
+                         cc: 'sandhya.yadav@diagonal.ai',            
+                         subject: "Approval Needed for Job ${env.JOB_NAME}",
+                         body: "Please approve the build by clicking on the following link: ${env.BUILD_URL}input/"
+                    
+                    echo 'Waiting for approval...'
+                    input message: 'Do you approve this build?', ok: 'Approve'
+                }
+            }
+        }
+
         stage('Run Streamlit App') {
             steps {
                 script {
-
                     bat '''
                         start cmd /c "call .\\env\\Scripts\\activate && streamlit run app.py --server.headless true > streamlit.log 2>&1"
                     '''
@@ -41,12 +54,18 @@ pipeline {
     }
 
     post {
-        always {
-            script {
-                bat '''
-                    echo The session will end when the job finishes.
-                '''
-            }
+        failure {
+            mail to: 'sandhyayadav0911@gmail.com',
+                 cc: 'sandhya.yadav@diagonal.ai',
+                 subject: "Failed: Build ${env.JOB_NAME}",
+                 body: "Build failed ${env.JOB_NAME} and Build number: ${env.BUILD_NUMBER}.\n\n View the logs at: \n ${env.BUILD_URL}"
+        }
+    
+        success {
+            mail to: 'sandhyayadav0911@gmail.com',
+                 cc: 'sandhya.yadav@diagonal.ai',
+                 subject: "Successful: Build ${env.JOB_NAME}",
+                 body: "Build Successful ${env.JOB_NAME} and Build number: ${env.BUILD_NUMBER}.\n\n View the logs at: \n ${env.BUILD_URL}"
         }
     }
 }
