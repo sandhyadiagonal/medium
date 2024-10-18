@@ -1,9 +1,6 @@
 pipeline {
     agent { label 'windows' }
 
-    // working script for running container from github dockerfile
-
-    stages {
         stage('Create Virtual Environment') {
             steps {
                 script {
@@ -18,38 +15,14 @@ pipeline {
             }
         }
 
-        stage('Run Containers with Docker Compose') {
+        stage('Run Streamlit App') {
             steps {
                 script {
-                    bat '''
-                        docker-compose down
-                        docker-compose up -d --build
-                    '''
-                }
-            }
-        }
 
-        stage('Pull Ollama Model in Ollama Container') {
-            steps {
-                script {
                     bat '''
-                        docker exec ollama-container bash -c "ollama pull phi:latest"
+                        start cmd /c "call .\\env\\Scripts\\activate && streamlit run app.py --server.headless true > streamlit.log 2>&1"
                     '''
-                }
-            }
-        }
-
-        stage('Run Streamlit App in Docker Container') {
-            steps {
-                script {
-                    bat '''
-                        docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1"
-                    '''
-                    while (true) {
-                        echo "Streamlit app is running in Docker container on port 8501..."
-                        sleep 60
-                    }
+                    sleep 180
                 }
             }
         }

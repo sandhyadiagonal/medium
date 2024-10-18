@@ -4,7 +4,6 @@ services:
 
   ollama-container:
     image: ollama/ollama
-    container_name: ollama-container
     volumes:
       - ./:/data
     ports:
@@ -12,6 +11,5 @@ services:
 
   python-app:
     image: langchain
-    container_name: python-app
     ports:
       - 8501:8501    
