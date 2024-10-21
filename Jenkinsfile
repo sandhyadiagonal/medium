@@ -1,7 +1,16 @@
 pipeline {
-    agent { label 'windows' }
+    agent { label 'linux' }
 
     stages {
+
+        stage('Clone Repository') {
+            steps {
+                script {
+                    git branch: 'main', url: 'https://github.com/sandhyadiagonal/medium.git'
+                }
+            }
+        }
+
         stage('Create Virtual Environment') {
             steps {
                 script {
@@ -16,11 +25,10 @@ pipeline {
             }
         }
 
-        stage('Run Containers with Docker Compose (Linux)') {
-            agent { label 'linux' }  // Specify Linux node for Docker operations
+        stage('Run Containers with Docker Compose') {
             steps {
                 script {
-                    sh '''
+                    bat '''
                         docker-compose down
                         docker-compose up -d --build
                     '''
@@ -28,26 +36,27 @@ pipeline {
             }
         }
 
-        stage('Pull Ollama Model in Ollama Container (Linux)') {
-            agent { label 'linux' }  // Specify Linux node
+        stage('Pull Ollama Model in Ollama Container') {
             steps {
                 script {
-                    sh '''
+                    bat '''
                         docker exec ollama-container bash -c "ollama pull phi:latest"
                     '''
                 }
             }
         }
 
-        stage('Run Streamlit App in Docker Container (Linux)') {
-            agent { label 'linux' }  // Specify Linux node
+        stage('Run Streamlit App in Docker Container') {
             steps {
                 script {
-                    // Start the Streamlit app and redirect logs
-                    sh '''
+                    bat '''
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8501"
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1"
                     '''
+                    while (true) {
+                        echo "Streamlit app is running in Docker container on port 8501..."
+                        sleep 60
+                    }
                 }
             }
         }
@@ -55,10 +64,9 @@ pipeline {
 
     post {
         always {
-            agent { label 'linux' }  // Ensure cleanup also happens on Linux
             script {
-                sh '''
-                    echo "The session will end when the job finishes."
+                bat '''
+                    echo The session will end when the job finishes.
                 '''
             }
         }
