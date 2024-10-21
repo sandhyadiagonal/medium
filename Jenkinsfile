@@ -16,10 +16,11 @@ pipeline {
             }
         }
 
-        stage('Run Containers with Docker Compose') {
+        stage('Run Containers with Docker Compose (Linux)') {
+            agent { label 'linux' }  // Specify Linux node for Docker operations
             steps {
                 script {
-                    bat '''
+                    sh '''
                         docker-compose down
                         docker-compose up -d --build
                     '''
@@ -27,27 +28,26 @@ pipeline {
             }
         }
 
-        stage('Pull Ollama Model in Ollama Container') {
+        stage('Pull Ollama Model in Ollama Container (Linux)') {
+            agent { label 'linux' }  // Specify Linux node
             steps {
                 script {
-                    bat '''
+                    sh '''
                         docker exec ollama-container bash -c "ollama pull phi:latest"
                     '''
                 }
             }
         }
 
-        stage('Run Streamlit App in Docker Container') {
+        stage('Run Streamlit App in Docker Container (Linux)') {
+            agent { label 'linux' }  // Specify Linux node
             steps {
                 script {
-                    bat '''
+                    // Start the Streamlit app and redirect logs
+                    sh '''
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1"
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8501"
                     '''
-                    while (true) {
-                        echo "Streamlit app is running in Docker container on port 8501..."
-                        sleep 60
-                    }
                 }
             }
         }
@@ -55,9 +55,10 @@ pipeline {
 
     post {
         always {
+            agent { label 'linux' }  // Ensure cleanup also happens on Linux
             script {
-                bat '''
-                    echo The session will end when the job finishes.
+                sh '''
+                    echo "The session will end when the job finishes."
                 '''
             }
         }
