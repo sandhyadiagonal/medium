@@ -2,7 +2,6 @@ pipeline {
     agent { label 'linux' }
 
     stages {
-
         stage('Create Virtual Environment') {
             steps {
                 script {
@@ -57,11 +56,24 @@ pipeline {
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
                         docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8501 > /tmp/streamlit.log 2>&1"
                     '''
-                    // Loop to keep the job alive while the Streamlit app runs
                     while (true) {
                         echo "Streamlit app is running in Docker container on port 8501..."
                         sleep 60
                     }
+                }
+            }
+        }
+
+        stage('Copy Streamlit Log to Host') {
+            steps {
+                script {
+                    sh '''
+                        docker cp python-app:/tmp/streamlit.log ./streamlit.log
+                    '''
+                    sh '''
+                        echo "Streamlit Log Contents:"
+                        cat ./streamlit.log
+                    '''
                 }
             }
         }
