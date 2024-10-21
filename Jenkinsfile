@@ -2,7 +2,6 @@ pipeline {
     agent { label 'windows' }
 
     stages {
-
         stage('Create Virtual Environment') {
             steps {
                 script {
@@ -17,67 +16,50 @@ pipeline {
             }
         }
 
-        stage('Approval') {
-            steps {
-                script {
-                    // Get the latest commit details
-                    def commitMessage = bat(script: 'git log -1 --pretty=format:"%s"', returnStdout: true).trim()
-                    def commitAuthor = bat(script: 'git log -1 --pretty=format:"%an"', returnStdout: true).trim()
-                    def commitHash = bat(script: 'git log -1 --pretty=format:"%h"', returnStdout: true).trim()
-
-                    // Email notification for approval with commit details
-                    mail to: 'sandhyayadav0911@gmail.com',
-                         cc: 'sandhya.yadav@diagonal.ai',            
-                         subject: "Approval Needed for Job ${env.JOB_NAME}",
-                         body: """\
-        Hi,
-
-        Please approve the build by reviewing the following details:
-
-        - Job Name: ${env.JOB_NAME}
-        - Build URL: ${env.BUILD_URL}
-        - Branch: ${env.GIT_BRANCH}
-        - Commit Hash: ${commitHash}
-        - Author: ${commitAuthor}
-        - Commit Message: ${commitMessage}
-
-        Click the following link to approve the build: ${env.BUILD_URL}input/
-
-        Regards,
-        Jenkins
-        """
-                            echo 'Waiting for approval...'
-                            input message: 'Do you approve this build?', ok: 'Approve'
-                        }
-                    }
-                }
-
-        stage('Run Streamlit App') {
+        stage('Run Containers with Docker Compose') {
             steps {
                 script {
                     bat '''
-                        start cmd /c "call .\\env\\Scripts\\activate && streamlit run app.py --server.headless true > streamlit.log 2>&1"
+                        docker-compose down
+                        docker-compose up -d --build
                     '''
-                    echo "Streamlit app is running on port 8501..."
-                    sleep 60 
+                }
+            }
+        }
+
+        stage('Pull Ollama Model in Ollama Container') {
+            steps {
+                script {
+                    bat '''
+                        docker exec ollama-container bash -c "ollama pull phi:latest"
+                    '''
+                }
+            }
+        }
+
+        stage('Run Streamlit App in Docker Container') {
+            steps {
+                script {
+                    bat '''
+                        docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1"
+                    '''
+                    while (true) {
+                        echo "Streamlit app is running in Docker container on port 8501..."
+                        sleep 60
+                    }
                 }
             }
         }
     }
 
     post {
-        failure {
-            mail to: 'sandhyayadav0911@gmail.com',
-                 cc: 'sandhya.yadav@diagonal.ai',
-                 subject: "Failed: Build ${env.JOB_NAME}",
-                 body: "Build failed ${env.JOB_NAME} and Build number: ${env.BUILD_NUMBER}.\n\n View the logs at: \n ${env.BUILD_URL}"
-        }
-    
-        success {
-            mail to: 'sandhyayadav0911@gmail.com',
-                 cc: 'sandhya.yadav@diagonal.ai',
-                 subject: "Successful: Build ${env.JOB_NAME}",
-                 body: "Build Successful ${env.JOB_NAME} and Build number: ${env.BUILD_NUMBER}.\n\n View the logs at: \n ${env.BUILD_URL}"
+        always {
+            script {
+                bat '''
+                    echo The session will end when the job finishes.
+                '''
+            }
         }
     }
 }
