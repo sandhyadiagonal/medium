@@ -42,9 +42,22 @@ pipeline {
         stage('Pull Ollama Model in Ollama Container') {
             steps {
                 script {
-                    sh '''
-                        docker exec ollama-container bash -c "ollama pull phi:latest"
-                    '''
+                    // Check if the model phi:latest exists, and pull it if it doesn't
+                    def modelExists = sh(script: '''
+                        if ollama list | grep -q "phi:latest"; then
+                            echo "true"
+                        else
+                            echo "false"
+                        fi
+                    ''', returnStdout: true).trim()
+
+                    if (modelExists == "false") {
+                        sh '''
+                            docker exec ollama-container bash -c "ollama pull phi:latest"
+                        '''
+                    } else {
+                        echo "Model phi:latest already exists. Skipping pull."
+                    }
                 }
             }
         }
@@ -67,11 +80,11 @@ pipeline {
                 script {
                     sh '''
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8501 > /tmp/streamlit.log 2>&1"
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8502 > /tmp/streamlit.log 2>&1"
                     '''
                     // Loop to keep the job alive while the Streamlit app runs
                     while (true) {
-                        echo "Streamlit app is running in Docker container on port 8501..."
+                        echo "Streamlit app is running in Docker container..."
                         sleep 60
                     }
                 }
