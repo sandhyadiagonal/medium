@@ -3,14 +3,6 @@ pipeline {
 
     stages {
 
-        // stage('Clone Repository') {
-        //     steps {
-        //         script {
-        //             git branch: 'main', url: 'https://github.com/sandhyadiagonal/medium.git'
-        //         }
-        //     }
-        // }
-
         stage('Create Virtual Environment') {
             steps {
                 script {
@@ -20,6 +12,16 @@ pipeline {
                         pip install --upgrade pip
                         pip install streamlit
                         pip install -r requirements.txt
+                    '''
+                }
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    sh '''
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
                     '''
                 }
             }
