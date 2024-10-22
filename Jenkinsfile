@@ -34,7 +34,7 @@ pipeline {
                 script {
                     bat '''
                         docker ps -a -q --filter "name=ollama-container" | findstr . && docker stop ollama-container && docker rm ollama-container
-                        docker run -d --name ollama-container sandhyadiagonal/medium:ollama-container
+                        docker run -d --name ollama-container -p 11434:11434 sandhyadiagonal/medium:ollama-container
 
                         docker ps -a -q --filter "name=python-app" | findstr . && docker stop python-app && docker rm python-app
                         docker run -d --name python-app -p 8501:8501 sandhyadiagonal/medium:python-app
