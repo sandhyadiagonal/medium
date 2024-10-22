@@ -91,6 +91,41 @@ pipeline {
             }
         }
 
+        stage('Approval') {
+            steps {
+                script {
+                    // Get the latest commit details
+                    def commitMessage = bat(script: 'git log -1 --pretty=format:"%s"', returnStdout: true).trim()
+                    def commitAuthor = bat(script: 'git log -1 --pretty=format:"%an"', returnStdout: true).trim()
+                    def commitHash = bat(script: 'git log -1 --pretty=format:"%h"', returnStdout: true).trim()
+
+                    // Email notification for approval with commit details
+                    mail to: 'sandhyayadav0911@gmail.com',
+                         cc: 'sandhya.yadav@diagonal.ai',            
+                         subject: "Approval Needed for Job ${env.JOB_NAME}",
+                         body: """\
+        Hi,
+
+        Please approve the build by reviewing the following details:
+
+        - Job Name: ${env.JOB_NAME}
+        - Build URL: ${env.BUILD_URL}
+        - Branch: ${env.GIT_BRANCH}
+        - Commit Hash: ${commitHash}
+        - Author: ${commitAuthor}
+        - Commit Message: ${commitMessage}
+
+        Click the following link to approve the build: ${env.BUILD_URL}input/
+
+        Regards,
+        Jenkins
+        """
+                            echo 'Waiting for approval...'
+                            input message: 'Do you approve this build?', ok: 'Approve'
+                        }
+                    }
+                }
+
         stage('Copy Streamlit Log to Host') {
             steps {
                 script {
