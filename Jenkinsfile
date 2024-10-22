@@ -16,13 +16,16 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        bat '''
-                            echo %PASSWORD% | docker login -u %USERNAME% --password-stdin
-                        '''
+        stages {
+            stage('Test Docker Login') {
+                steps {
+                    script {
+                        withCredentials([usernamePassword(credentialsId: 'docker_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                            bat '''
+                                docker logout
+                                docker login -u %USERNAME% -p %PASSWORD%
+                            '''
+                        }
                     }
                 }
             }
