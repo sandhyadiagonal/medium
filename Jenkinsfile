@@ -29,28 +29,6 @@ pipeline {
             }
         }
 
-        stage('Pull Ollama Model in Ollama Container') {
-            steps {
-                script {
-                    def modelExists = bat(script: '''
-                        docker exec ollama-container ollama list | findstr "phi:latest" >nul
-                        if %ERRORLEVEL% EQU 0 (
-                            echo true
-                        ) else (
-                            echo false
-                        )
-                    ''', returnStdout: true).trim()
-
-                    if (modelExists == "false") {
-                        bat '''
-                            docker exec ollama-container ollama pull phi:latest
-                        '''
-                    } else {
-                        echo "Model phi:latest already exists. Skipping pull."
-                    }
-                }
-            }
-        }
         stage('Run Docker Containers') {
             steps {
                 script {
@@ -69,11 +47,12 @@ pipeline {
             steps {
                 script {
                     def modelExists = bat(script: '''
-                        if docker exec ollama-container ollama list | findstr "phi:latest" >nul; then
+                        docker exec ollama-container ollama list | findstr "phi:latest" >nul
+                        if %ERRORLEVEL% EQU 0 (
                             echo true
-                        else
+                        ) else (
                             echo false
-                        fi
+                        )
                     ''', returnStdout: true).trim()
 
                     if (modelExists == "false") {
