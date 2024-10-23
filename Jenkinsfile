@@ -131,10 +131,10 @@ pipeline {
             steps {
                 script {
                     bat '''
-                        docker cp python-app:/tmp/streamlit.log C:\\tmp\\streamlit.log
+                        docker cp python-app:/tmp/streamlit.log C:\\Users\\YourUsername\\streamlit.log
                     '''
                     bat '''
-                        type C:\\tmp\\streamlit.log
+                        type C:\\Users\\SandhyaYadav\\streamlit.log
                     '''
                 }
             }
