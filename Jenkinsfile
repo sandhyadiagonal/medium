@@ -29,15 +29,12 @@ pipeline {
             }
         }
 
-        stage('Run Docker Containers') {
+        stage('Run Docker Containers with Docker Compose') {
             steps {
                 script {
                     bat '''
-                        docker ps -a -q --filter "name=ollama-container" | findstr . && docker stop ollama-container && docker rm ollama-container
-                        docker run -d --name ollama-container -p 11434:11434 sandhyadiagonal/medium:ollama-container
-
-                        docker ps -a -q --filter "name=python-app" | findstr . && docker stop python-app && docker rm python-app
-                        docker run -d --name python-app -p 8501:8501 sandhyadiagonal/medium:python-app
+                        docker-compose down
+                        docker-compose up -d
                     '''
                 }
             }
@@ -62,7 +59,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Setup Streamlit Config') {
             steps {
@@ -131,7 +127,7 @@ pipeline {
             steps {
                 script {
                     bat '''
-                        docker cp python-app:/tmp/streamlit.log C:\\Users\\YourUsername\\streamlit.log
+                        docker cp python-app:/tmp/streamlit.log C:\\Users\\SandhyaYadav\\streamlit.log
                     '''
                     bat '''
                         type C:\\Users\\SandhyaYadav\\streamlit.log
