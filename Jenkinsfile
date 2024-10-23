@@ -82,7 +82,7 @@ pipeline {
                     bat '''
                         docker exec python-app pip install --upgrade pip
                         docker exec python-app pip install -r requirements.txt
-                        docker exec python-app streamlit run app.py --server.headless true --server.port 8501 > streamlit.log 2>&1
+                        docker exec python-app streamlit run app.py --server.headless true > streamlit.log 2>&1
                     '''
                     while (true) {
                         echo "Streamlit app is running in Docker container..."
