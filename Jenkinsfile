@@ -46,16 +46,13 @@ pipeline {
         stage('Pull Ollama Model in Ollama Container') {
             steps {
                 script {
-                    def modelExists = bat(script: '''
-                        docker exec ollama-container ollama list | findstr "phi:latest" >nul
-                        if %ERRORLEVEL% EQU 0 (
-                            echo true
-                        ) else (
-                            echo false
-                        )
-                    ''', returnStdout: true).trim()
+                    def modelCheckStatus = bat(script: '''
+                        docker exec ollama-container ollama list | findstr "phi:latest"
+                        exit /b %ERRORLEVEL%
+                    ''', returnStatus: true)
 
-                    if (modelExists == "false") {
+                    if (modelCheckStatus != 0) {
+                        echo "Model phi:latest not found. Pulling model..."
                         bat '''
                             docker exec ollama-container ollama pull phi:latest
                         '''
@@ -65,6 +62,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Setup Streamlit Config') {
             steps {
