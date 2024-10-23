@@ -67,11 +67,13 @@ pipeline {
         stage('Setup Streamlit Config') {
             steps {
                 script {
-                    bat '''
-                        mkdir %USERPROFILE%\\.streamlit
-                        echo [browser] > %USERPROFILE%\\.streamlit\\config.toml
-                        echo gatherUsageStats = false >> %USERPROFILE%\\.streamlit\\config.toml
-                    '''
+                    def streamlitConfigDir = "%USERPROFILE%\\.streamlit"
+
+                    bat """
+                        mkdir ${streamlitConfigDir} || echo "Directory already exists"
+                        echo [browser] > ${streamlitConfigDir}\\config.toml
+                        echo gatherUsageStats = false >> ${streamlitConfigDir}\\config.toml
+                    """
                 }
             }
         }
