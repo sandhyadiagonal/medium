@@ -16,18 +16,6 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh '''
-                            echo $PASSWORD | docker login -u $USERNAME --password-stdin
-                        '''
-                    }
-                }
-            }
-        }
-
         stage('Run Containers with Docker Compose') {
             steps {
                 script {
