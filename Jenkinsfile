@@ -42,8 +42,9 @@ pipeline {
         stage('Pull Ollama Model in Ollama Container') {
             steps {
                 script {
+                    // Check if the model phi:latest exists, and pull it if it doesn't
                     def modelExists = sh(script: '''
-                        if sudo docker exec ollama-container ollama list | grep -q "phi:latest"; then
+                        if ollama list | grep -q "phi:latest"; then
                             echo "true"
                         else
                             echo "false"
@@ -52,7 +53,7 @@ pipeline {
 
                     if (modelExists == "false") {
                         sh '''
-                            sudo docker exec ollama-container bash -c "ollama pull phi:latest"
+                            docker exec ollama-container bash -c "ollama pull phi:latest"
                         '''
                     } else {
                         echo "Model phi:latest already exists. Skipping pull."
@@ -64,6 +65,7 @@ pipeline {
         stage('Setup Streamlit Config') {
             steps {
                 script {
+                    // Create the Streamlit config directory and file with the required setting
                     sh '''
                         mkdir -p ~/.streamlit
                         echo "[browser]" > ~/.streamlit/config.toml
@@ -77,29 +79,14 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        sudo docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        sudo docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8502 > /tmp/streamlit.log 2>&1"
+                        docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8502 > /tmp/streamlit.log 2>&1"
                     '''
                     // Loop to keep the job alive while the Streamlit app runs
                     while (true) {
                         echo "Streamlit app is running in Docker container..."
                         sleep 60
                     }
-                }
-            }
-        }
-
-        stage('Copy Streamlit Log to Host') {
-            steps {
-                script {
-                    // Copy the log file from the container to the host
-                    sh '''
-                        sudo docker cp python-app:/tmp/streamlit.log ./streamlit.log
-                    '''
-                    sh '''
-                        echo "Streamlit Log Contents:"
-                        cat ./streamlit.log
-                    '''
                 }
             }
         }
