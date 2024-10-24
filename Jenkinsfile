@@ -31,11 +31,29 @@ pipeline {
         stage('Run Containers with Docker Compose') {
             steps {
                 script {
-                    sh '''
-                        docker-compose down
-                        docker build -t langchain .
-                        docker-compose up -d --build
-                    '''
+                    // Check if the Ollama container is running on port 11434
+                    def isOllamaRunning = sh(script: '''
+                        if lsof -iTCP:11434 -sTCP:LISTEN; then
+                            echo "true"
+                        else
+                            echo "false"
+                        fi
+                    ''', returnStdout: true).trim()
+
+                    if (isOllamaRunning == "false") {
+                        echo "Ollama is not running. Starting Ollama and other containers with Docker Compose."
+                        sh '''
+                            docker-compose down
+                            docker build -t langchain .
+                            docker-compose up -d --build
+                        '''
+                    } else {
+                        echo "Ollama is already running on port 11434. Skipping start."
+                        // Start other services without recreating the Ollama container
+                        sh '''
+                            docker-compose up -d --no-recreate python-app
+                        '''
+                    }
                 }
             }
         }
