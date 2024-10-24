@@ -26,7 +26,7 @@ RUN pip install --upgrade pip && \
 COPY app.py ./
 
 # Expose port for Streamlit
-EXPOSE 8501
+EXPOSE 8502
 
 # Set the entry point to run Streamlit
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8502", "--server.address=0.0.0.0"]

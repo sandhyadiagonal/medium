@@ -45,7 +45,6 @@ pipeline {
                         sh '''
                             docker-compose down
                             docker build -t langchain .
-                            docker build -t ollama/ollama .
                             docker-compose up -d --build
                         '''
                     } else {
