@@ -28,6 +28,16 @@ pipeline {
             }
         }
 
+        stage('Build Ollama Image') {
+            steps {
+                script {
+                    sh '''
+                        docker build -t ollama/ollama .
+                    '''
+                }
+            }
+        }
+
         stage('Run Containers with Docker Compose') {
             steps {
                 script {
