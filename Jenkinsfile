@@ -76,24 +76,24 @@ pipeline {
             }
         }
 
-        stage('Pull Ollama Model in Ollama Container') {
-            steps {
-                script {
-                    // Check if the model phi:latest exists, and pull it if it doesn't
-                    def modelExists = sh(script: '''
-                        docker exec ollama-container bash -c "ollama list | grep -q 'phi:latest'"
-                    ''', returnStatus: true)
+        // stage('Pull Ollama Model in Ollama Container') {
+        //     steps {
+        //         script {
+        //             // Check if the model phi:latest exists, and pull it if it doesn't
+        //             def modelExists = sh(script: '''
+        //                 docker exec ollama-container bash -c "ollama list | grep -q 'phi:latest'"
+        //             ''', returnStatus: true)
 
-                    if (modelExists != 0) {
-                        sh '''
-                            docker exec ollama-container bash -c "ollama pull phi:latest"
-                        '''
-                    } else {
-                        echo "Model phi:latest already exists. Skipping pull."
-                    }
-                }
-            }
-        }
+        //             if (modelExists != 0) {
+        //                 sh '''
+        //                     docker exec ollama-container bash -c "ollama pull phi:latest"
+        //                 '''
+        //             } else {
+        //                 echo "Model phi:latest already exists. Skipping pull."
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Setup Streamlit Config') {
             steps {
@@ -120,22 +120,6 @@ pipeline {
                         echo "Streamlit app is running in Docker container..."
                         sleep 60
                     }
-                }
-            }
-        }
-
-        stage('Copy Streamlit Log to Host') {
-            steps {
-                script {
-                    // Copy the log file from the container to the host
-                    sh '''
-                        docker cp python-app:/tmp/streamlit.log ./streamlit.log
-                    '''
-                    // Display the contents of the log file
-                    sh '''
-                        echo "Streamlit Log Contents:"
-                        cat ./streamlit.log
-                    '''
                 }
             }
         }
