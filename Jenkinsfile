@@ -28,16 +28,6 @@ pipeline {
             }
         }
 
-        stage('Build Ollama Image') {
-            steps {
-                script {
-                    sh '''
-                        docker build -t ollama/ollama .
-                    '''
-                }
-            }
-        }
-
         stage('Run Containers with Docker Compose') {
             steps {
                 script {
@@ -64,6 +54,24 @@ pipeline {
                             docker-compose up -d --no-recreate python-app
                         '''
                     }
+                }
+            }
+        }
+
+        stage('Install Ollama in Ollama Container') {
+            steps {
+                script {
+                    // Install Ollama inside the Ollama container if it is not installed
+                    sh '''
+                        docker exec ollama-container bash -c "
+                        if ! command -v ollama &> /dev/null; then
+                            echo 'Ollama not found. Installing...';
+                            pip install ollama  # Adjust this line if the installation method is different
+                        else
+                            echo 'Ollama is already installed.';
+                        fi
+                        "
+                    '''
                 }
             }
         }
