@@ -33,6 +33,7 @@ pipeline {
                 script {
                     sh '''
                         docker-compose down
+                        docker build -t langchain .
                         docker-compose up -d --build
                     '''
                 }
