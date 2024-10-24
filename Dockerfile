@@ -9,14 +9,11 @@ ENV PIP_DEFAULT_TIMEOUT=100
 # Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies for building Python packages and Ollama
+# Install system dependencies for building Python packages
 RUN apt-get update && apt-get install -y \
     build-essential \
     libffi-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Install Ollama (replace with the correct command to install Ollama)
-RUN pip install ollama
 
 # Copy the requirements.txt file into the container at /app
 COPY requirements.txt ./
