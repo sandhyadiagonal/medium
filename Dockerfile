@@ -9,11 +9,14 @@ ENV PIP_DEFAULT_TIMEOUT=100
 # Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies for building Python packages
+# Install system dependencies for building Python packages and Ollama
 RUN apt-get update && apt-get install -y \
     build-essential \
     libffi-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Ollama (replace with the correct command to install Ollama)
+RUN pip install ollama
 
 # Copy the requirements.txt file into the container at /app
 COPY requirements.txt ./
@@ -26,7 +29,7 @@ RUN pip install --upgrade pip && \
 COPY app.py ./
 
 # Expose port for Streamlit
-EXPOSE 8501
+EXPOSE 8502
 
 # Set the entry point to run Streamlit
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8502", "--server.address=0.0.0.0"]
