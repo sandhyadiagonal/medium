@@ -90,6 +90,22 @@ pipeline {
                 }
             }
         }
+
+        stage('Copy Streamlit Log to Host') {
+            steps {
+                script {
+                    // Copy the log file from the container to the host
+                    sh '''
+                        docker cp python-app:/tmp/streamlit.log ./streamlit.log
+                    '''
+                    // Display the contents of the log file
+                    sh '''
+                        echo "Streamlit Log Contents:"
+                        cat ./streamlit.log
+                    '''
+                }
+            }
+        }
     }
 
     post {
