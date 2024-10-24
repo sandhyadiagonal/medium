@@ -1,14 +1,14 @@
 pipeline {
-    agent { label 'windows' }
+    agent { label 'linux' }
 
     stages {
         stage('Create Virtual Environment') {
             steps {
                 script {
-                    bat '''
-                        python -m venv env
-                        call .\\env\\Scripts\\activate
-                        python -m pip install --upgrade pip
+                    sh '''
+                        python3 -m venv env
+                        source ./env/bin/activate
+                        pip install --upgrade pip
                         pip install streamlit
                         pip install -r requirements.txt
                     '''
@@ -16,25 +16,24 @@ pipeline {
             }
         }
 
-        stage('Test Docker Login') {
+        stage('Docker Login') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        bat '''
-                            docker logout
-                            docker login -u %USERNAME% -p %PASSWORD%
+                        sh '''
+                            echo $PASSWORD | docker login -u $USERNAME --password-stdin
                         '''
                     }
                 }
             }
         }
 
-        stage('Run Docker Containers with Docker Compose') {
+        stage('Run Containers with Docker Compose') {
             steps {
                 script {
-                    bat '''
+                    sh '''
                         docker-compose down
-                        docker-compose up -d
+                        docker-compose up -d --build
                     '''
                 }
             }
@@ -43,15 +42,17 @@ pipeline {
         stage('Pull Ollama Model in Ollama Container') {
             steps {
                 script {
-                    def modelCheckStatus = bat(script: '''
-                        docker exec ollama-container ollama list | findstr "phi:latest"
-                        exit /b %ERRORLEVEL%
-                    ''', returnStatus: true)
+                    def modelExists = sh(script: '''
+                        if ollama list | grep -q "phi:latest"; then
+                            echo "true"
+                        else
+                            echo "false"
+                        fi
+                    ''', returnStdout: true).trim()
 
-                    if (modelCheckStatus != 0) {
-                        echo "Model phi:latest not found. Pulling model..."
-                        bat '''
-                            docker exec ollama-container ollama pull phi:latest
+                    if (modelExists == "false") {
+                        sh '''
+                            docker exec ollama-container bash -c "ollama pull phi:latest"
                         '''
                     } else {
                         echo "Model phi:latest already exists. Skipping pull."
@@ -63,13 +64,11 @@ pipeline {
         stage('Setup Streamlit Config') {
             steps {
                 script {
-                    def streamlitConfigDir = "%USERPROFILE%\\.streamlit"
-
-                    bat """
-                        mkdir ${streamlitConfigDir} || echo "Directory already exists"
-                        echo [browser] > ${streamlitConfigDir}\\config.toml
-                        echo gatherUsageStats = false >> ${streamlitConfigDir}\\config.toml
-                    """
+                    sh '''
+                        mkdir -p ~/.streamlit
+                        echo "[browser]" > ~/.streamlit/config.toml
+                        echo "gatherUsageStats = false" >> ~/.streamlit/config.toml
+                    '''
                 }
             }
         }
@@ -77,11 +76,11 @@ pipeline {
         stage('Run Streamlit App in Docker Container') {
             steps {
                 script {
-                    bat '''
-                        docker exec python-app pip install --upgrade pip
-                        docker exec python-app pip install -r requirements.txt
-                        docker exec python-app streamlit run app.py --server.headless true > streamlit.log 2>&1
+                    sh '''
+                        docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8502 > /tmp/streamlit.log 2>&1"
                     '''
+                    // Loop to keep the job alive while the Streamlit app runs
                     while (true) {
                         echo "Streamlit app is running in Docker container..."
                         sleep 60
@@ -93,11 +92,13 @@ pipeline {
         stage('Copy Streamlit Log to Host') {
             steps {
                 script {
-                    bat '''
-                        docker cp python-app:/tmp/streamlit.log C:\\Users\\SandhyaYadav\\streamlit.log
+                    // Copy the log file from the container to the host
+                    sh '''
+                        docker cp python-app:/tmp/streamlit.log ./streamlit.log
                     '''
-                    bat '''
-                        type C:\\Users\\SandhyaYadav\\streamlit.log
+                    sh '''
+                        echo "Streamlit Log Contents:"
+                        cat ./streamlit.log
                     '''
                 }
             }
@@ -107,7 +108,7 @@ pipeline {
     post {
         always {
             script {
-                bat '''
+                sh '''
                     echo "The session will end when the job finishes."
                 '''
             }
