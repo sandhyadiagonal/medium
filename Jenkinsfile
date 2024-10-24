@@ -32,8 +32,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        echo $PASSWORD | sudo -S docker-compose down
-                        echo $PASSWORD | sudo -S docker-compose up -d --build
+                        docker-compose down
+                        docker-compose up -d --build
                     '''
                 }
             }
