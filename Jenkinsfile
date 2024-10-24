@@ -21,7 +21,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         sh '''
-                            echo $PASSWORD | docker login -u $USERNAME --password-stdin
+                            echo $PASSWORD | sudo docker login -u $USERNAME --password-stdin
                         '''
                     }
                 }
@@ -32,8 +32,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker-compose down
-                        docker-compose up -d --build
+                        sudo docker-compose down
+                        sudo docker-compose up -d --build
                     '''
                 }
             }
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 script {
                     def modelExists = sh(script: '''
-                        if ollama list | grep -q "phi:latest"; then
+                        if sudo docker exec ollama-container ollama list | grep -q "phi:latest"; then
                             echo "true"
                         else
                             echo "false"
@@ -52,7 +52,7 @@ pipeline {
 
                     if (modelExists == "false") {
                         sh '''
-                            docker exec ollama-container bash -c "ollama pull phi:latest"
+                            sudo docker exec ollama-container bash -c "ollama pull phi:latest"
                         '''
                     } else {
                         echo "Model phi:latest already exists. Skipping pull."
@@ -77,8 +77,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8502 > /tmp/streamlit.log 2>&1"
+                        sudo docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
+                        sudo docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8502 > /tmp/streamlit.log 2>&1"
                     '''
                     // Loop to keep the job alive while the Streamlit app runs
                     while (true) {
@@ -94,7 +94,7 @@ pipeline {
                 script {
                     // Copy the log file from the container to the host
                     sh '''
-                        docker cp python-app:/tmp/streamlit.log ./streamlit.log
+                        sudo docker cp python-app:/tmp/streamlit.log ./streamlit.log
                     '''
                     sh '''
                         echo "Streamlit Log Contents:"
