@@ -1,5 +1,10 @@
-# Use an official Python runtime as a parent image
-FROM python:latest
+# Use a specific version of the official Python runtime as a parent image
+FROM python:3.9
+
+# Set environment variables for pip
+ENV PIP_NO_CACHE_DIR=off
+ENV PIP_DISABLE_PIP_VERSION_CHECK=on
+ENV PIP_DEFAULT_TIMEOUT=100
 
 # Set the working directory in the container
 WORKDIR /app
