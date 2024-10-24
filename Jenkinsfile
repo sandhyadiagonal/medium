@@ -58,6 +58,24 @@ pipeline {
             }
         }
 
+        stage('Install Ollama in Ollama Container') {
+            steps {
+                script {
+                    // Install Ollama inside the Ollama container if it is not installed
+                    sh '''
+                        # Check if the Ollama command is available
+                        if ! docker exec ollama-container bash -c "command -v ollama"; then
+                            echo 'Ollama not found. Installing...';
+                            # Assuming ollama is installed via pip
+                            docker exec ollama-container bash -c "pip install ollama"
+                        else
+                            echo 'Ollama is already installed.';
+                        fi
+                    '''
+                }
+            }
+        }
+
         stage('Pull Ollama Model in Ollama Container') {
             steps {
                 script {
