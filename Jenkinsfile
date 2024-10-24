@@ -31,9 +31,9 @@ pipeline {
         stage('Run Containers with Docker Compose') {
             steps {
                 script {
-                    // Check if the Ollama container is running on port 11435
+                    // Check if the Ollama container is running on port 11434
                     def isOllamaRunning = sh(script: '''
-                        if lsof -iTCP:11435 -sTCP:LISTEN; then
+                        if lsof -iTCP:11434 -sTCP:LISTEN; then
                             echo "true"
                         else
                             echo "false"
@@ -48,30 +48,12 @@ pipeline {
                             docker-compose up -d --build
                         '''
                     } else {
-                        echo "Ollama is already running on port 11435. Skipping start."
+                        echo "Ollama is already running on port 11434. Skipping start."
                         // Start other services without recreating the Ollama container
                         sh '''
                             docker-compose up -d --no-recreate python-app
                         '''
                     }
-                }
-            }
-        }
-
-        stage('Install Ollama in Ollama Container') {
-            steps {
-                script {
-                    // Install Ollama inside the Ollama container if it is not installed
-                    sh '''
-                        docker exec ollama-container bash -c "
-                        if ! command -v ollama &> /dev/null; then
-                            echo 'Ollama not found. Installing...';
-                            pip install ollama  # Adjust this line if the installation method is different
-                        else
-                            echo 'Ollama is already installed.';
-                        fi
-                        "
-                    '''
                 }
             }
         }
