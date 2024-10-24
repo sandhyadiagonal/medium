@@ -44,14 +44,10 @@ pipeline {
                 script {
                     // Check if the model phi:latest exists, and pull it if it doesn't
                     def modelExists = sh(script: '''
-                        if ollama list | grep -q "phi:latest"; then
-                            echo "true"
-                        else
-                            echo "false"
-                        fi
-                    ''', returnStdout: true).trim()
+                        docker exec ollama-container bash -c "ollama list | grep -q 'phi:latest'"
+                    ''', returnStatus: true)
 
-                    if (modelExists == "false") {
+                    if (modelExists != 0) {
                         sh '''
                             docker exec ollama-container bash -c "ollama pull phi:latest"
                         '''
