@@ -1,6 +1,12 @@
 pipeline {
     agent { label 'linux' }
 
+    environment {
+        imagename = "your-dockerhub-username/langchain"  // Specify your Docker Hub username and image name
+        registryCredential = 'dockerhub_credentials'      // The ID of your Docker Hub credentials in Jenkins
+        dockerImage = ''
+    }
+
     stages {
         stage('Create Virtual Environment') {
             steps {
@@ -19,11 +25,20 @@ pipeline {
         stage('Docker Login') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    withCredentials([usernamePassword(credentialsId: registryCredential, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         sh '''
                             echo $PASSWORD | docker login -u $USERNAME --password-stdin
                         '''
                     }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image using the Dockerfile in the current directory
+                    dockerImage = docker.build(imagename)
                 }
             }
         }
@@ -44,7 +59,6 @@ pipeline {
                         echo "Ollama is not running. Starting Ollama and other containers with Docker Compose."
                         sh '''
                             docker-compose down
-                            docker build -t langchain .
                             docker-compose up -d --build
                         '''
                     } else {
@@ -60,29 +74,13 @@ pipeline {
         stage('Install Ollama in Ollama Container') {
             steps {
                 script {
-                    // Install Ollama inside the Ollama container if it is not installed
                     sh '''
-                        # Check if the Ollama command is available
                         if ! docker exec ollama-container bash -c "command -v ollama"; then
                             echo 'Ollama not found. Installing...';
-                            # Assuming ollama is installed via pip
                             docker exec ollama-container bash -c "pip install ollama"
                         else
                             echo 'Ollama is already installed.';
                         fi
-                    '''
-                }
-            }
-        }
-
-        stage('Setup Streamlit Config') {
-            steps {
-                script {
-                    // Create the Streamlit config directory and file with the required setting
-                    sh '''
-                        mkdir -p ~/.streamlit
-                        echo "[browser]" > ~/.streamlit/config.toml
-                        echo "gatherUsageStats = false" >> ~/.streamlit/config.toml
                     '''
                 }
             }
@@ -94,12 +92,10 @@ pipeline {
                     sh '''
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
                         
+                        # Start Streamlit app in background to allow ollama to run concurrently
                         docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1 &"
                         
-                        while true; do
-                            echo "Streamlit app is running in Docker container..."
-                            sleep 60;
-                        done
+                        # Optional: You can check logs or status here if needed.
                     '''
                 }
             }

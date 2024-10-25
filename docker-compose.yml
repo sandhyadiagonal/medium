@@ -9,11 +9,11 @@ services:
       - ./:/data
     ports:
       - 11435:11435
-    command: /bin/ollama serve
+    command: ollama serve
 
   python-app:
-    image: langchain
-    container_name: python-app
+    build:
+      context: .
+      dockerfile: Dockerfile 
     ports:
-      - 8501:8501  
-    command: streamlit run app.py --server.port=8501  
+      - "8501:8501"  
