@@ -28,32 +28,12 @@ pipeline {
             }
         }
 
-        stage('Pull Docker Images from Docker Hub') {
+        stage('Run Containers with Docker Compose') {
             steps {
                 script {
                     sh '''
-                        docker pull sandhyadiagonal/medium:python-app
-                        docker pull sandhyadiagonal/medium:ollama-container
-                    '''
-                }
-            }
-        }
-
-        stage('Run Python App Container') {
-            steps {
-                script {
-                    sh '''
-                        docker run -d --name python-app -p 8501:8501 sandhyadiagonal/medium:python-app
-                    '''
-                }
-            }
-        }
-
-        stage('Run Ollama Container') {
-            steps {
-                script {
-                    sh '''
-                        docker run -d --name ollama-container -p 11434:11434 sandhyadiagonal/medium:ollama-container
+                        docker-compose down
+                        docker-compose up -d --build
                     '''
                 }
             }
@@ -63,7 +43,7 @@ pipeline {
             steps {
                 script {
                     def modelExists = sh(script: '''
-                        if docker exec ollama-container bash -c "ollama list | grep -q 'phi:latest'"; then
+                        if ollama list | grep -q "phi:latest"; then
                             echo "true"
                         else
                             echo "false"
@@ -94,13 +74,14 @@ pipeline {
             }
         }
 
-        stage('Run Streamlit App in Python App Container') {
+        stage('Run Streamlit App in Docker Container') {
             steps {
                 script {
                     sh '''
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
                         docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8501 > /tmp/streamlit.log 2>&1"
                     '''
+                    // Loop to keep the job alive while the Streamlit app runs
                     while (true) {
                         echo "Streamlit app is running in Docker container..."
                         sleep 60
