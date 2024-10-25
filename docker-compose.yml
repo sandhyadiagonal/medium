@@ -8,10 +8,10 @@ services:
     volumes:
       - ./:/data
     ports:
-      - 11435:11435
+      - 11434:11434
 
   python-app:
     image: langchain
     container_name: python-app
     ports:
-      - 8502:8502    
+      - 8501:8501    

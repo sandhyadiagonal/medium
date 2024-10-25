@@ -31,9 +31,9 @@ pipeline {
         stage('Run Containers with Docker Compose') {
             steps {
                 script {
-                    // Check if the Ollama container is running on port 11435
+                    // Check if the Ollama container is running on port 11434
                     def isOllamaRunning = sh(script: '''
-                        if lsof -iTCP:11435 -sTCP:LISTEN; then
+                        if lsof -iTCP:11434 -sTCP:LISTEN; then
                             echo "true"
                         else
                             echo "false"
@@ -48,7 +48,7 @@ pipeline {
                             docker-compose up -d --build
                         '''
                     } else {
-                        echo "Ollama is already running on port 11435. Skipping start."
+                        echo "Ollama is already running on port 11434. Skipping start."
                         // Start other services without recreating the Ollama container
                         sh '''
                             docker-compose up -d --no-recreate python-app
@@ -113,7 +113,7 @@ pipeline {
                 script {
                     sh '''
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8502 > /tmp/streamlit.log 2>&1"
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1"
                     '''
                     // Loop to keep the job alive while the Streamlit app runs
                     while (true) {
