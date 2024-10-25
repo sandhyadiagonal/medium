@@ -1,6 +1,7 @@
 from langchain_community.llms import Ollama
 import streamlit as st
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain_ollama import OllamaLLM
 
 llm = Ollama(model="phi:latest", base_url="http://ollama-container:11435", verbose=True)
 
