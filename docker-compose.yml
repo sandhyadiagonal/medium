@@ -3,17 +3,15 @@ version: '3'
 services:
 
   ollama-container:
-    image: ollama/ollama
+    image: sandhyadiagonal/medium:ollama-container
     container_name: ollama-container
     volumes:
       - ./:/data
     ports:
       - 11434:11434
-    command: ["ollama", "serve"]
 
   python-app:
-    image: langchain
+    image: sandhyadiagonal/medium:python-app
     container_name: python-app
     ports:
-      - 8501:8501  
-    command: streamlit run app.py --server.port=8501  
+      - 8501:8501    

@@ -31,46 +31,45 @@ pipeline {
         stage('Run Containers with Docker Compose') {
             steps {
                 script {
-                    // Check if the Ollama container is running on port 11434
-                    def isOllamaRunning = sh(script: '''
-                        if lsof -iTCP:11434 -sTCP:LISTEN; then
+                    sh '''
+                        docker-compose down
+                        docker-compose up -d --build
+                    '''
+                }
+            }
+        }
+
+        stage('Pull Ollama Model in Ollama Container') {
+            steps {
+                script {
+                    // Check if the model phi:latest exists, and pull it if it doesn't
+                    def modelExists = sh(script: '''
+                        if ollama list | grep -q "phi:latest"; then
                             echo "true"
                         else
                             echo "false"
                         fi
                     ''', returnStdout: true).trim()
 
-                    if (isOllamaRunning == "false") {
-                        echo "Ollama is not running. Starting Ollama and other containers with Docker Compose."
+                    if (modelExists == "false") {
                         sh '''
-                            docker-compose down
-                            docker-compose up -d --build
-                        '''
-                        // Install Ollama after starting the container
-                        sh '''
-                            docker exec ollama-container bash -c "pip install ollama"
+                            docker exec ollama-container bash -c "ollama pull phi:latest"
                         '''
                     } else {
-                        echo "Ollama is already running on port 11434. Skipping start."
-                        sh '''
-                            docker-compose up -d --no-recreate python-app
-                        '''
+                        echo "Model phi:latest already exists. Skipping pull."
                     }
                 }
             }
         }
-        
-        stage('Install Ollama in Ollama Container') {
+
+        stage('Setup Streamlit Config') {
             steps {
                 script {
-                    // Check if Ollama is installed inside the container
+                    // Create the Streamlit config directory and file with the required setting
                     sh '''
-                        if ! docker exec ollama-container bash -c "command -v ollama"; then
-                            echo 'Ollama not found. Installing...';
-                            docker exec ollama-container bash -c "pip install ollama"
-                        else
-                            echo 'Ollama is already installed.';
-                        fi
+                        mkdir -p ~/.streamlit
+                        echo "[browser]" > ~/.streamlit/config.toml
+                        echo "gatherUsageStats = false" >> ~/.streamlit/config.toml
                     '''
                 }
             }
@@ -80,13 +79,29 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        # Ensure Streamlit app runs without blocking other processes
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        
-                        # Start Streamlit app in background to allow ollama to run concurrently
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1 &"
-                        
-                        # Optional: You can check logs or status here if needed.
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8502 > /tmp/streamlit.log 2>&1"
+                    '''
+                    // Loop to keep the job alive while the Streamlit app runs
+                    while (true) {
+                        echo "Streamlit app is running in Docker container..."
+                        sleep 60
+                    }
+                }
+            }
+        }
+
+        stage('Copy Streamlit Log to Host') {
+            steps {
+                script {
+                    // Copy the log file from the container to the host
+                    sh '''
+                        docker cp python-app:/tmp/streamlit.log ./streamlit.log
+                    '''
+                    // Display the contents of the log file
+                    sh '''
+                        echo "Streamlit Log Contents:"
+                        cat ./streamlit.log
                     '''
                 }
             }
