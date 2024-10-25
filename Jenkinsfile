@@ -49,7 +49,6 @@ pipeline {
                         '''
                     } else {
                         echo "Ollama is already running on port 11435. Skipping start."
-                        // Start other services without recreating the Ollama container
                         sh '''
                             docker-compose up -d --no-recreate python-app
                         '''
