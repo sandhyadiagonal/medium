@@ -42,7 +42,6 @@ pipeline {
         stage('Pull Ollama Model in Ollama Container') {
             steps {
                 script {
-                    // Check if the model phi:latest exists, and pull it if it doesn't
                     def modelExists = sh(script: '''
                         if ollama list | grep -q "phi:latest"; then
                             echo "true"
