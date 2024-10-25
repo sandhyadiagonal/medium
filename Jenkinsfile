@@ -2,19 +2,6 @@ pipeline {
     agent { label 'linux' }
 
     stages {
-        stage('Create Virtual Environment') {
-            steps {
-                script {
-                    sh '''
-                        python3 -m venv env
-                        source ./env/bin/activate
-                        pip install --upgrade pip
-                        pip install streamlit
-                        pip install -r requirements.txt
-                    '''
-                }
-            }
-        }
 
         stage('Docker Login') {
             steps {
@@ -61,63 +48,9 @@ pipeline {
             }
         }
 
-        stage('Setup Streamlit Config') {
-            steps {
-                script {
-                    // Create the Streamlit config directory and Streamlit won’t collect and send usage data. This is particularly useful in a corporate environment or when privacy and data security are critical
-                    sh '''
-                        mkdir -p ~/.streamlit
-                        echo "[browser]" > ~/.streamlit/config.toml
-                        echo "gatherUsageStats = false" >> ~/.streamlit/config.toml
-                    '''
-                }
-            }
-        }
-
-        stage('Approval') {
-            steps {
-                script {
-                    // Get the latest commit details
-                    def commitMessage = sh(script: 'git log -1 --pretty=format:"%s"', returnStdout: true).trim()
-                    def commitAuthor = sh(script: 'git log -1 --pretty=format:"%an"', returnStdout: true).trim()
-                    def commitHash = sh(script: 'git log -1 --pretty=format:"%h"', returnStdout: true).trim()
-
-                    // Email notification for approval with commit details
-                    mail to: 'sandhyayadav0911@gmail.com',
-                        cc: 'sandhya.yadav@diagonal.ai',            
-                        subject: "Approval Needed for Job ${env.JOB_NAME}",
-                        body: """\
-        Hi,
-
-        Please approve the build by reviewing the following details:
-
-        - Job Name: ${env.JOB_NAME}
-        - Build URL: ${env.BUILD_URL}
-        - Branch: ${env.GIT_BRANCH}
-        - Commit Hash: ${commitHash}
-        - Author: ${commitAuthor}
-        - Commit Message: ${commitMessage}
-
-        Click the following link to approve the build: ${env.BUILD_URL}input/
-
-        Regards,
-        Jenkins
-        """
-                    echo 'Waiting for approval...'
-                    input message: 'Do you approve this build?', ok: 'Approve'
-                }
-            }
-        }
-
-
         stage('Run Streamlit App in Docker Container') {
             steps {
                 script {
-                    sh '''
-                        docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8501 > /tmp/streamlit.log 2>&1"
-                    '''
-                    // Loop to keep the job alive while the Streamlit app runs
                     while (true) {
                         echo "Streamlit app is running in Docker container..."
                         sleep 60
