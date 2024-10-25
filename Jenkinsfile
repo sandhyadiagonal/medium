@@ -75,25 +75,6 @@ pipeline {
             }
         }
 
-        stage('Pull Ollama Model in Ollama Container') {
-            steps {
-                script {
-                    // Check if the model phi:latest exists, and pull it if it doesn't
-                    def modelExists = sh(script: '''
-                        docker exec ollama-container bash -c "ollama list | grep -q 'phi:latest'"
-                    ''', returnStatus: true)
-
-                    if (modelExists != 0) {
-                        sh '''
-                            docker exec ollama-container bash -c "ollama pull phi:latest"
-                        '''
-                    } else {
-                        echo "Model phi:latest already exists. Skipping pull."
-                    }
-                }
-            }
-        }
-
         stage('Setup Streamlit Config') {
             steps {
                 script {
@@ -112,13 +93,16 @@ pipeline {
                 script {
                     sh '''
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1"
+                        
+                        # Start Streamlit app in background to allow ollama to run concurrently
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1 &"
+                        
+                        # Loop to keep the job alive while both apps run
+                        while true; do
+                            echo "Streamlit app is running in Docker container..."
+                            sleep 60;
+                        done
                     '''
-                    // Loop to keep the job alive while the Streamlit app runs
-                    while (true) {
-                        echo "Streamlit app is running in Docker container..."
-                        sleep 60
-                    }
                 }
             }
         }
