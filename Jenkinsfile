@@ -94,10 +94,8 @@ pipeline {
                     sh '''
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
                         
-                        # Start Streamlit app in background to allow ollama to run concurrently
                         docker exec python-app bash -c "streamlit run app.py --server.headless true > /tmp/streamlit.log 2>&1 &"
                         
-                        # Loop to keep the job alive while both apps run
                         while true; do
                             echo "Streamlit app is running in Docker container..."
                             sleep 60;
