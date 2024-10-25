@@ -75,24 +75,24 @@ pipeline {
             }
         }
 
-        // stage('Pull Ollama Model in Ollama Container') {
-        //     steps {
-        //         script {
-        //             // Check if the model phi:latest exists, and pull it if it doesn't
-        //             def modelExists = sh(script: '''
-        //                 docker exec ollama-container bash -c "ollama list | grep -q 'phi:latest'"
-        //             ''', returnStatus: true)
+        stage('Pull Ollama Model in Ollama Container') {
+            steps {
+                script {
+                    // Check if the model phi:latest exists, and pull it if it doesn't
+                    def modelExists = sh(script: '''
+                        docker exec ollama-container bash -c "ollama list | grep -q 'phi:latest'"
+                    ''', returnStatus: true)
 
-        //             if (modelExists != 0) {
-        //                 sh '''
-        //                     docker exec ollama-container bash -c "ollama pull phi:latest"
-        //                 '''
-        //             } else {
-        //                 echo "Model phi:latest already exists. Skipping pull."
-        //             }
-        //         }
-        //     }
-        // }
+                    if (modelExists != 0) {
+                        sh '''
+                            docker exec ollama-container bash -c "ollama pull phi:latest"
+                        '''
+                    } else {
+                        echo "Model phi:latest already exists. Skipping pull."
+                    }
+                }
+            }
+        }
 
         stage('Setup Streamlit Config') {
             steps {
