@@ -80,7 +80,7 @@ pipeline {
                 script {
                     sh '''
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
-                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8502 > /tmp/streamlit.log 2>&1"
+                        docker exec python-app bash -c "streamlit run app.py --server.headless true --server.port 8501 > /tmp/streamlit.log 2>&1"
                     '''
                     // Loop to keep the job alive while the Streamlit app runs
                     while (true) {
