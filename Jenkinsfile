@@ -64,7 +64,7 @@ pipeline {
         stage('Setup Streamlit Config') {
             steps {
                 script {
-                    // Create the Streamlit config directory and file with the required setting
+                    // Create the Streamlit config directory and Streamlit won’t collect and send usage data. This is particularly useful in a corporate environment or when privacy and data security are critical
                     sh '''
                         mkdir -p ~/.streamlit
                         echo "[browser]" > ~/.streamlit/config.toml
