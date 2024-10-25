@@ -9,7 +9,7 @@ services:
       - ./:/data
     ports:
       - 11435:11435
-    command: /bin/bash -c "pip install ollama && ollama serve"
+    command: ["ollama", "serve"]
 
   python-app:
     image: langchain
