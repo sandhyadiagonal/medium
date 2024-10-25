@@ -44,8 +44,11 @@ pipeline {
                         echo "Ollama is not running. Starting Ollama and other containers with Docker Compose."
                         sh '''
                             docker-compose down
-                            docker build -t langchain .
                             docker-compose up -d --build
+                        '''
+                        // Install Ollama after starting the container
+                        sh '''
+                            docker exec ollama-container bash -c "pip install ollama"
                         '''
                     } else {
                         echo "Ollama is already running on port 11435. Skipping start."
@@ -56,7 +59,7 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Install Ollama in Ollama Container') {
             steps {
                 script {
