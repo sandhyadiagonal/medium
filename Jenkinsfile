@@ -79,7 +79,6 @@ pipeline {
         stage('Run Streamlit App in Docker Container') {
             steps {
                 script {
-                    // Start Streamlit app in its own container if needed
                     sh '''
                         # Ensure Streamlit app runs without blocking other processes
                         docker exec python-app bash -c "pip install --upgrade pip --root-user-action=ignore && pip install -r requirements.txt"
