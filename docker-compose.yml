@@ -12,8 +12,8 @@ services:
     command: ollama serve
 
   python-app:
-    build:
-      context: .
-      dockerfile: Dockerfile 
+    image: langchain
+    container_name: python-app
     ports:
-      - "8501:8501"  
+      - 8501:8501  
+    command: streamlit run app.py --server.port=8501  
