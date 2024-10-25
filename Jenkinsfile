@@ -31,9 +31,9 @@ pipeline {
         stage('Run Containers with Docker Compose') {
             steps {
                 script {
-                    // Check if the Ollama container is running on port 11435
+                    // Check if the Ollama container is running on port 11434
                     def isOllamaRunning = sh(script: '''
-                        if lsof -iTCP:11435 -sTCP:LISTEN; then
+                        if lsof -iTCP:11434 -sTCP:LISTEN; then
                             echo "true"
                         else
                             echo "false"
@@ -51,7 +51,7 @@ pipeline {
                             docker exec ollama-container bash -c "pip install ollama"
                         '''
                     } else {
-                        echo "Ollama is already running on port 11435. Skipping start."
+                        echo "Ollama is already running on port 11434. Skipping start."
                         sh '''
                             docker-compose up -d --no-recreate python-app
                         '''
