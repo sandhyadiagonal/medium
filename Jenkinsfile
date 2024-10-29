@@ -45,6 +45,40 @@ pipeline {
             }
         }
 
+        stage('Approval') {
+            steps {
+                script {
+                    def repoURL = "https://github.com/sandhyadiagonal/medium"
+                    def blueOceanURL = "${env.JENKINS_URL}/blue/organizations/jenkins/${env.JOB_NAME}/detail/${env.JOB_NAME}/${env.BUILD_NUMBER}/pipeline"
+                    def dockerhubURL = "https://hub.docker.com/r/sandhyadiagonal/medium/tags"
+
+                    echo "Review GitHub Repository: ${repoURL}"
+                    echo "Review DockerHub: ${dockerhubURL}"
+                    echo "View the logs at: ${env.BUILD_URL}/console"
+
+                    mail from: 'Pipeline approval <noreply@yourdomain.com>',
+                         to: 'sandhyayadav0911@gmail.com',
+                         cc: 'sandhya.yadav@diagonal.ai',
+                         subject: "Approval Needed for Job ${env.JOB_NAME}",
+                         body: """\
+Hi,
+
+Please approve the build by reviewing the following details:
+
+- Job Name: ${env.JOB_NAME}
+- Started By: ${env.BUILD_USER_ID}
+
+Kindly refer to this link to view the details: ${blueOceanURL}
+
+Regards,
+Jenkins
+"""
+                    input message: """\
+Have you thoroughly reviewed the necessary code changes before approving this build? Do you approve this build? """, ok: 'Approve'
+                }
+            }
+        }
+        
         stage('Pull Ollama Model in Ollama Container') {
             steps {
                 script {
@@ -82,12 +116,20 @@ pipeline {
     }
 
     post {
-        always {
-            script {
-                sh '''
-                    echo "The session will end when the job finishes."
-                '''
-            }
+        failure {
+            mail from: 'Pipeline approval <noreply@yourdomain.com>',
+                 to: 'sandhyayadav0911@gmail.com',
+                 cc: 'sandhya.yadav@diagonal.ai',
+                 subject: "Failed: Build ${env.JOB_NAME}",
+                 body: "Build failed for ${env.JOB_NAME}, Build number: ${env.BUILD_NUMBER}.\n\n View the logs at: \n ${env.BUILD_URL}"
+        }
+
+        success {
+            mail from: 'Pipeline approval <noreply@yourdomain.com>',
+                 to: 'sandhyayadav0911@gmail.com',
+                 cc: 'sandhya.yadav@diagonal.ai',
+                 subject: "Successful: Build ${env.JOB_NAME}",
+                 body: "Build Successful for ${env.JOB_NAME}, Build number: ${env.BUILD_NUMBER}.\n\n View the logs at: \n ${env.BUILD_URL}"
         }
     }
 }
