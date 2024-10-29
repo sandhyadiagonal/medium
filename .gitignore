@@ -1,5 +1,2 @@
 env/
-Dockerfile
-requirements.txt
 trial.txt
-app.py
