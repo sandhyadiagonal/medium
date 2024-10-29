@@ -15,6 +15,25 @@ pipeline {
             }
         }
 
+        stage('Build and Push Docker Images') {
+            steps {
+                script {
+                    sh '''
+                        docker build -t sandhyadiagonal/medium:python-app -f Dockerfile.python-app .
+                    '''
+                    sh '''
+                        docker push sandhyadiagonal/medium:python-app
+                    '''
+                    sh '''
+                        docker build -t sandhyadiagonal/medium:ollama-container -f Dockerfile.ollama-container .
+                    '''
+                    sh '''
+                        docker push sandhyadiagonal/medium:ollama-container
+                    '''
+                }
+            }
+        }
+
         stage('Run Containers with Docker Compose') {
             steps {
                 script {
