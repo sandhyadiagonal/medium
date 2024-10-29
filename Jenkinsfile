@@ -3,11 +3,26 @@ pipeline {
 
     stages {
 
+        stage('Create Virtual Environment') {
+            steps {
+                script {
+                    sh '''
+                        python3 -m venv env
+                        source ./env/bin/activate
+                        pip install --upgrade pip
+                        pip install streamlit
+                        pip install -r requirements.txt
+                    '''
+                }
+            }
+        }
+
         stage('Docker Login') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         sh '''
+                            source ./env/bin/activate
                             echo $PASSWORD | docker login -u $USERNAME --password-stdin
                         '''
                     }
@@ -19,15 +34,10 @@ pipeline {
             steps {
                 script {
                     sh '''
+                        source ./env/bin/activate
                         docker build -t sandhyadiagonal/medium:python-app -f Dockerfile .
-                    '''
-                    sh '''
                         docker push sandhyadiagonal/medium:python-app
-                    '''
-                    sh '''
                         docker pull ollama/ollama:latest
-                    '''
-                    sh '''
                         docker-compose down
                         docker-compose up -d
                     '''
@@ -39,6 +49,7 @@ pipeline {
             steps {
                 script {
                     def modelExists = sh(script: '''
+                        source ./env/bin/activate
                         if ollama list | grep -q "phi:latest"; then
                             echo "true"
                         else
@@ -48,6 +59,7 @@ pipeline {
 
                     if (modelExists == "false") {
                         sh '''
+                            source ./env/bin/activate
                             docker exec ollama-container bash -c "ollama pull phi:latest"
                         '''
                     } else {
