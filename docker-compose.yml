@@ -3,7 +3,7 @@ version: '3'
 services:
 
   ollama-container:
-    image: sandhyadiagonal/medium:ollama-container
+    image: ollama/ollama:latest
     container_name: ollama-container
     volumes:
       - ./:/data

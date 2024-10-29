@@ -19,27 +19,17 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker build -t sandhyadiagonal/medium:python-app -f Dockerfile.python-app .
+                        docker build -t sandhyadiagonal/medium:python-app -f Dockerfile .
                     '''
                     sh '''
                         docker push sandhyadiagonal/medium:python-app
                     '''
                     sh '''
-                        docker build -t sandhyadiagonal/medium:ollama-container -f Dockerfile.ollama-container .
+                        docker pull ollama/ollama:latest
                     '''
-                    sh '''
-                        docker push sandhyadiagonal/medium:ollama-container
-                    '''
-                }
-            }
-        }
-
-        stage('Run Containers with Docker Compose') {
-            steps {
-                script {
                     sh '''
                         docker-compose down
-                        docker-compose up -d --build
+                        docker-compose up -d
                     '''
                 }
             }
