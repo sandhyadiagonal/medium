@@ -9,7 +9,7 @@ pipeline {
                     sh '''
                         python3 -m venv env
                         source ./env/bin/activate
-                        pip install --upgrade pip
+                        pip install --upgrade pip setuptools wheel
                         pip install streamlit
                         pip install -r requirements.txt
                     '''
