@@ -106,10 +106,11 @@ Have you thoroughly reviewed the necessary code changes before approving this bu
         stage('Run Streamlit App in Docker Container') {
             steps {
                 script {
-                    while (true) {
-                        echo "Streamlit app is running in Docker container..."
-                        sleep 60
-                    }
+                    echo "Starting the Streamlit app in Docker container..."
+                    sh '''
+                        source ./env/bin/activate
+                        docker exec -d python-app bash -c "streamlit run app.py --server.headless true"
+                    '''
                 }
             }
         }
